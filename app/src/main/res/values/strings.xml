@@ -1,3 +1,24 @@
 <resources>
-    <string name="app_name">AndroidAssestmentProject</string>
+    <string name="app_name">GitHub User Search</string>
+    <string name="search_title">Search Users</string>
+    <string name="action_search">Search</string>
+    <string name="search_query_hint">Search GitHub username</string>
+    <string name="search_idle_message">Type a username to start searching</string>
+    <string name="search_empty_message">No users found</string>
+    <string name="cache_info">You are offline, showing cached data</string>
+    <string name="retry">Retry</string>
+    <string name="user_detail_title">User Detail</string>
+    <string name="avatar_content_description">User avatar</string>
+    <string name="username_format">\@%1$s</string>
+    <string name="stat_repos">%1$d\nRepos</string>
+    <string name="stat_followers">%1$d\nFollowers</string>
+    <string name="stat_following">%1$d\nFollowing</string>
+    <string name="company_format">Company: %1$s</string>
+    <string name="location_format">Location: %1$s</string>
+    <string name="blog_format">Blog: %1$s</string>
+    <string name="error_no_connection">No internet connection</string>
+    <string name="error_rate_limited">GitHub API rate limit reached, try again in a minute</string>
+    <string name="error_not_found">User not found</string>
+    <string name="error_invalid_query">Invalid search keyword</string>
+    <string name="error_unknown">Something went wrong, please try again</string>
 </resources>

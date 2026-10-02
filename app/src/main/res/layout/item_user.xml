@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
+
+    <ImageView
+        android:id="@+id/ivAvatar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/avatar_content_description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/bg_avatar_placeholder" />
+
+    <TextView
+        android:id="@+id/tvUsername"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        app:layout_constraintBottom_toBottomOf="@id/ivAvatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivAvatar"
+        app:layout_constraintTop_toTopOf="@id/ivAvatar"
+        tools:text="octocat" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
