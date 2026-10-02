@@ -8,6 +8,7 @@ import androidx.core.view.isVisible
 import com.example.androidassestmentproject.databinding.ActivityUserListBinding
 import com.example.androidassestmentproject.presentation.common.UserAdapter
 import com.example.androidassestmentproject.presentation.common.applySystemBarInsets
+import com.example.androidassestmentproject.presentation.common.showDataBanner
 import com.example.androidassestmentproject.presentation.common.toMessageRes
 import com.example.androidassestmentproject.presentation.detail.UserDetailActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,14 +32,16 @@ class UserListActivity : AppCompatActivity() {
 
         binding.rvUsers.adapter = userAdapter
         binding.btnRetry.setOnClickListener { viewModel.loadUsers() }
-
-        viewModel.uiState.observe(this) { state -> render(state) }
+        viewModel.uiState.observe(this) { state ->
+            render(state)
+            renderBanner()
+        }
+        viewModel.isOnline.observe(this) { renderBanner() }
     }
 
     private fun render(state: UserListUiState) {
         binding.progressBar.isVisible = state is UserListUiState.Loading
         binding.rvUsers.isVisible = state is UserListUiState.Success
-        binding.tvCacheInfo.isVisible = state is UserListUiState.Success && state.fromCache
         binding.layoutMessage.isVisible = state is UserListUiState.Error
 
         when (state) {
@@ -46,5 +49,12 @@ class UserListActivity : AppCompatActivity() {
             is UserListUiState.Success -> userAdapter.submitList(state.users)
             is UserListUiState.Error -> binding.tvMessage.setText(state.errorType.toMessageRes())
         }
+    }
+
+    private fun renderBanner() {
+        val isOnline = viewModel.isOnline.value ?: true
+        val isShowingSavedData =
+            (viewModel.uiState.value as? UserListUiState.Success)?.fromCache == true
+        binding.tvBanner.showDataBanner(isOnline, isShowingSavedData)
     }
 }

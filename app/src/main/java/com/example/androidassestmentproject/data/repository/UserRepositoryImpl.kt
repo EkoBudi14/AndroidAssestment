@@ -1,9 +1,9 @@
 package com.example.androidassestmentproject.data.repository
 
-import com.example.androidassestmentproject.data.Mapper.toDomain
-import com.example.androidassestmentproject.data.Mapper.toEntity
 import com.example.androidassestmentproject.data.local.UserDao
 import com.example.androidassestmentproject.data.local.entity.UserEntity
+import com.example.androidassestmentproject.data.mapper.toDomain
+import com.example.androidassestmentproject.data.mapper.toEntity
 import com.example.androidassestmentproject.data.remote.GithubApiService
 import com.example.androidassestmentproject.domain.model.ErrorType
 import com.example.androidassestmentproject.domain.model.Resource
@@ -45,9 +45,9 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override fun getUserDetail(username: String): Flow<Resource<UserDetail>> = flow {
-        val cachedDetail = userDao.getUserDetail(username)
+        val cachedDetail = userDao.getUserDetail(username)?.toDomain()
         if (cachedDetail != null) {
-            emit(Resource.Success(cachedDetail.toDomain(), fromCache = true))
+            emit(Resource.Success(cachedDetail))
         }
 
         val remoteResult = try {
@@ -60,11 +60,13 @@ class UserRepositoryImpl @Inject constructor(
             Resource.Error(e.toErrorType())
         }
 
-
-        if (remoteResult is Resource.Success || cachedDetail == null) {
-            emit(remoteResult)
+        when {
+            remoteResult is Resource.Success -> emit(remoteResult)
+            cachedDetail != null -> emit(Resource.Success(cachedDetail, fromCache = true))
+            else -> emit(remoteResult)
         }
     }
+
 
     private fun List<UserEntity>.toCachedResult(errorType: ErrorType): Resource<List<User>> {
         return if (isEmpty()) {
@@ -74,18 +76,7 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun getUserDetailFromCache(
-        username: String,
-        errorType: ErrorType
-    ): Resource<UserDetail> {
-        val cachedDetail = userDao.getUserDetail(username)
-        return if (cachedDetail == null) {
-            Resource.Error(errorType)
-        } else {
-            Resource.Success(cachedDetail.toDomain(), fromCache = true)
-        }
-    }
-
+    
     private fun HttpException.toErrorType(): ErrorType = when (code()) {
         403, 429 -> ErrorType.RATE_LIMITED
         404 -> ErrorType.NOT_FOUND

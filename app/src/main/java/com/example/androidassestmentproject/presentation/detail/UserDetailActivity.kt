@@ -14,6 +14,7 @@ import com.example.androidassestmentproject.R
 import com.example.androidassestmentproject.databinding.ActivityUserDetailBinding
 import com.example.androidassestmentproject.domain.model.UserDetail
 import com.example.androidassestmentproject.presentation.common.applySystemBarInsets
+import com.example.androidassestmentproject.presentation.common.showDataBanner
 import com.example.androidassestmentproject.presentation.common.toMessageRes
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,7 +34,11 @@ class UserDetailActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.btnRetry.setOnClickListener { viewModel.loadUserDetail() }
 
-        viewModel.uiState.observe(this) { state -> render(state) }
+        viewModel.uiState.observe(this) { state ->
+            render(state)
+            renderBanner()
+        }
+        viewModel.isOnline.observe(this) { renderBanner() }
     }
 
     private fun render(state: UserDetailUiState) {
@@ -44,7 +49,7 @@ class UserDetailActivity : AppCompatActivity() {
         when (state) {
             UserDetailUiState.Loading -> Unit
             is UserDetailUiState.Success -> {
-                binding.tvCacheInfo.isVisible = state.fromCache
+
                 bindUserDetail(state.userDetail)
             }
 
@@ -75,6 +80,13 @@ class UserDetailActivity : AppCompatActivity() {
         isVisible = !value.isNullOrBlank()
         if (value.isNullOrBlank()) return
         text = if (format != null) getString(format, value) else value
+    }
+
+    private fun renderBanner() {
+        val isOnline = viewModel.isOnline.value ?: true
+        val isShowingSavedData =
+            (viewModel.uiState.value as? UserDetailUiState.Success)?.fromCache == true
+        binding.tvBanner.showDataBanner(isOnline, isShowingSavedData)
     }
 
     companion object {

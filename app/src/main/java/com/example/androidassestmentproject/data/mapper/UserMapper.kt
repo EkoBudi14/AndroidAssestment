@@ -1,4 +1,4 @@
-package com.example.androidassestmentproject.data.Mapper
+package com.example.androidassestmentproject.data.mapper
 
 import com.example.androidassestmentproject.data.local.entity.UserDetailEntity
 import com.example.androidassestmentproject.data.local.entity.UserEntity
