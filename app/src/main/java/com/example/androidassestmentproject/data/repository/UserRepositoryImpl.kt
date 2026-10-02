@@ -10,6 +10,8 @@ import com.example.androidassestmentproject.domain.model.Resource
 import com.example.androidassestmentproject.domain.model.User
 import com.example.androidassestmentproject.domain.model.UserDetail
 import com.example.androidassestmentproject.domain.repository.UserRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
@@ -42,15 +44,25 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUserDetail(username: String): Resource<UserDetail> {
-        return try {
+    override fun getUserDetail(username: String): Flow<Resource<UserDetail>> = flow {
+        val cachedDetail = userDao.getUserDetail(username)
+        if (cachedDetail != null) {
+            emit(Resource.Success(cachedDetail.toDomain(), fromCache = true))
+        }
+
+        val remoteResult = try {
             val userDetail = api.getUserDetail(username).toEntity()
             userDao.upsertUserDetail(userDetail)
             Resource.Success(userDetail.toDomain())
         } catch (e: IOException) {
-            getUserDetailFromCache(username, ErrorType.NO_CONNECTION)
+            Resource.Error(ErrorType.NO_CONNECTION)
         } catch (e: HttpException) {
-            getUserDetailFromCache(username, e.toErrorType())
+            Resource.Error(e.toErrorType())
+        }
+
+
+        if (remoteResult is Resource.Success || cachedDetail == null) {
+            emit(remoteResult)
         }
     }
 

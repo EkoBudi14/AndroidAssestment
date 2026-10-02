@@ -9,6 +9,7 @@ import com.example.androidassestmentproject.databinding.ActivityUserListBinding
 import com.example.androidassestmentproject.presentation.common.UserAdapter
 import com.example.androidassestmentproject.presentation.common.applySystemBarInsets
 import com.example.androidassestmentproject.presentation.common.toMessageRes
+import com.example.androidassestmentproject.presentation.detail.UserDetailActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,6 +19,7 @@ class UserListActivity : AppCompatActivity() {
     private val viewModel: UserListViewModel by viewModels()
 
     private val userAdapter = UserAdapter { user ->
+        startActivity(UserDetailActivity.newIntent(this, user.username))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
