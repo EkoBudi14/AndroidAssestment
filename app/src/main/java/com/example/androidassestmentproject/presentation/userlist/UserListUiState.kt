@@ -1,4 +1,4 @@
-package com.example.androidassestmentproject.presentation.UserList
+package com.example.androidassestmentproject.presentation.userlist
 
 import com.example.androidassestmentproject.domain.model.ErrorType
 import com.example.androidassestmentproject.domain.model.User

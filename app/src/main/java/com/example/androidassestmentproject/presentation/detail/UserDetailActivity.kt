@@ -49,7 +49,6 @@ class UserDetailActivity : AppCompatActivity() {
         when (state) {
             UserDetailUiState.Loading -> Unit
             is UserDetailUiState.Success -> {
-
                 bindUserDetail(state.userDetail)
             }
 

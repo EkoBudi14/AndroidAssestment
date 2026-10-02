@@ -24,3 +24,4 @@ interface GithubApiService {
         @Path("username") username: String
     ): UserDetailDto
 }
+

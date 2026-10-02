@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidAssestmentProject">
         <activity
-            android:name=".presentation.UserList.UserListActivity"
+            android:name=".presentation.userlist.UserListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,4 +1,4 @@
-package com.example.androidassestmentproject.presentation.UserList
+package com.example.androidassestmentproject.presentation.userlist
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

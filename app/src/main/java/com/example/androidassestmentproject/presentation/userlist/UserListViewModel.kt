@@ -1,4 +1,4 @@
-package com.example.androidassestmentproject.presentation.UserList
+package com.example.androidassestmentproject.presentation.userlist
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
