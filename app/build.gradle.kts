@@ -27,7 +27,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
-        buildConfigField("String", "GITHUB_TOKEN", "\"${localProperties.getProperty("github.token", "")}\"")
+        buildConfigField(
+            "String",
+            "GITHUB_TOKEN",
+            "\"${localProperties.getProperty("github.token", "")}\""
+        )
     }
 
     buildTypes {
@@ -72,6 +76,6 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.glide)
-
-
+    debugImplementation(libs.chucker.library)
+    releaseImplementation(libs.chucker.noop)
 }
