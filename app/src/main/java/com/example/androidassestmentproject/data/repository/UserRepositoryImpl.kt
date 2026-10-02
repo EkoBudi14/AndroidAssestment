@@ -9,18 +9,22 @@ import com.example.androidassestmentproject.domain.model.ErrorType
 import com.example.androidassestmentproject.domain.model.Resource
 import com.example.androidassestmentproject.domain.model.User
 import com.example.androidassestmentproject.domain.model.UserDetail
+import com.example.androidassestmentproject.domain.network.NetworkMonitor
 import com.example.androidassestmentproject.domain.repository.UserRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     private val api: GithubApiService,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val networkMonitor: NetworkMonitor
 ) : UserRepository {
+
     override suspend fun getUsers(): Resource<List<User>> {
+        if (!isOnline()) return userDao.getUsers().toCachedResult(ErrorType.NO_CONNECTION)
+
         return try {
             val users = api.getUsers().map { it.toEntity() }
             userDao.upsertUsers(users)
@@ -33,6 +37,8 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchUsers(query: String): Resource<List<User>> {
+        if (!isOnline()) return userDao.searchUsers(query).toCachedResult(ErrorType.NO_CONNECTION)
+
         return try {
             val users = api.searchUsers(query).items.map { it.toEntity() }
             userDao.upsertUsers(users)
@@ -44,29 +50,21 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getUserDetail(username: String): Flow<Resource<UserDetail>> = flow {
-        val cachedDetail = userDao.getUserDetail(username)?.toDomain()
-        if (cachedDetail != null) {
-            emit(Resource.Success(cachedDetail))
-        }
+    override suspend fun getUserDetail(username: String): Resource<UserDetail> {
+        if (!isOnline()) return getUserDetailFromCache(username, ErrorType.NO_CONNECTION)
 
-        val remoteResult = try {
+        return try {
             val userDetail = api.getUserDetail(username).toEntity()
             userDao.upsertUserDetail(userDetail)
             Resource.Success(userDetail.toDomain())
         } catch (e: IOException) {
-            Resource.Error(ErrorType.NO_CONNECTION)
+            getUserDetailFromCache(username, ErrorType.NO_CONNECTION)
         } catch (e: HttpException) {
-            Resource.Error(e.toErrorType())
-        }
-
-        when {
-            remoteResult is Resource.Success -> emit(remoteResult)
-            cachedDetail != null -> emit(Resource.Success(cachedDetail, fromCache = true))
-            else -> emit(remoteResult)
+            getUserDetailFromCache(username, e.toErrorType())
         }
     }
 
+    private suspend fun isOnline(): Boolean = networkMonitor.isOnline.first()
 
     private fun List<UserEntity>.toCachedResult(errorType: ErrorType): Resource<List<User>> {
         return if (isEmpty()) {
@@ -76,7 +74,18 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    
+    private suspend fun getUserDetailFromCache(
+        username: String,
+        errorType: ErrorType
+    ): Resource<UserDetail> {
+        val cachedDetail = userDao.getUserDetail(username)
+        return if (cachedDetail == null) {
+            Resource.Error(errorType)
+        } else {
+            Resource.Success(cachedDetail.toDomain(), fromCache = true)
+        }
+    }
+
     private fun HttpException.toErrorType(): ErrorType = when (code()) {
         403, 429 -> ErrorType.RATE_LIMITED
         404 -> ErrorType.NOT_FOUND

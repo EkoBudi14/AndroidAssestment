@@ -36,11 +36,9 @@ class UserDetailViewModel @Inject constructor(
     fun loadUserDetail() {
         viewModelScope.launch {
             _uiState.value = UserDetailUiState.Loading
-            getUserDetailUseCase(username).collect { result ->
-                _uiState.value = when (result) {
-                    is Resource.Success -> UserDetailUiState.Success(result.data, result.fromCache)
-                    is Resource.Error -> UserDetailUiState.Error(result.errorType)
-                }
+            _uiState.value = when (val result = getUserDetailUseCase(username)) {
+                is Resource.Success -> UserDetailUiState.Success(result.data, result.fromCache)
+                is Resource.Error -> UserDetailUiState.Error(result.errorType)
             }
         }
     }
