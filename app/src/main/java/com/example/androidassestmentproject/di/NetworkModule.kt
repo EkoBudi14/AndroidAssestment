@@ -1,11 +1,14 @@
 package com.example.androidassestmentproject.di
 
+import android.content.Context
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.example.androidassestmentproject.BuildConfig
 import com.example.androidassestmentproject.data.remote.GithubApiService
 import com.example.androidassestmentproject.data.remote.GithubHeaderInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -21,7 +24,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
@@ -30,8 +33,13 @@ object NetworkModule {
             }
         }
 
+        val chuckerInterceptor = ChuckerInterceptor.Builder(context)
+            .redactHeaders("Authorization")
+            .build()
+
         return OkHttpClient.Builder()
             .addInterceptor(GithubHeaderInterceptor(BuildConfig.GITHUB_TOKEN))
+            .addInterceptor(chuckerInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
